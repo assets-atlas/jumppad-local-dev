@@ -17,15 +17,22 @@ resource "container" "vault" {
 
     environment = {
         VAULT_DEV_ROOT_TOKEN_ID = variable.vault_token
+        VAULT_ADDR              = "http://localhost:8200"
+    }
+
+    health_check {
+
+        timeout = "15s"
+
+        exec {
+            command = ["vault", "status"]
+        }
     }
 
 
 }
 
 resource "remote_exec" "vault_config" {
-//   image {
-//     name = "hashicorp/vault:${variable.version}"
-//   }
 
   target = resource.container.vault
 
