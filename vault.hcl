@@ -48,7 +48,7 @@ vault secrets enable transit
   # Mount a volume containing the config
 
   environment = {
-    VAULT_ADDR = "http://localhost:8200"
+    VAULT_ADDR  = "http://localhost:8200"
     VAULT_TOKEN = variable.vault_token
   }
 
