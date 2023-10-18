@@ -1,13 +1,14 @@
 resource "container" "vault" {
     network {
         id         = resource.network.local.id
-        aliases    = ["vault_ip_address"]
+        aliases    = ["vault.container.jumppad.dev"]
     }
 
     port {
         local  = 8200
         remote = 8200
         host   = 8200
+        open_in_browser = true
     }
 
 
@@ -43,6 +44,16 @@ resource "remote_exec" "vault_config" {
   script = <<-EOF
 #!/bin/sh
 vault secrets enable transit
+
+vault secrets enable database
+
+vault write database/config/timescale \
+    plugin_name="postgresql-database-plugin" \
+    connection_url="postgresql://{{username}}:{{password}}@${resource.container.timescale_db.container_name}:5432/${variable.timescale_db}" \
+    allowed_roles="test-role" \
+    username="vault" \
+    password="password" \
+
   EOF
 
   # Mount a volume containing the config
@@ -53,6 +64,7 @@ vault secrets enable transit
   }
 
   depends_on = [
-    "resource.container.vault"
+    "resource.container.vault",
+    "resource.remote_exec.timescale_config"
   ]
 }
