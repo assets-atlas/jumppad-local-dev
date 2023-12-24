@@ -53,7 +53,7 @@ psql "host=localhost port=5432 dbname=${variable.timescale_db} user=${variable.t
         first_name VARCHAR(255),
         middle_name VARCHAR(255),
         last_name VARCHAR(255),
-        dob DATE,
+        dob VARCHAR(255),
         key_name VARCHAR(255)
 );'
   EOF
