@@ -68,6 +68,7 @@ vault write database/roles/api \
     default_ttl="1h" \
     max_ttl="24h"
 
+vault auth enable userpass
 
   EOF
 

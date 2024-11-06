@@ -61,3 +61,5 @@ psql "host=localhost port=5432 dbname=${variable.timescale_db} user=${variable.t
     "resource.container.timescale_db"
   ]
 }
+
+
