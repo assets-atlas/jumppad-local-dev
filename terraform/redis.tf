@@ -18,5 +18,13 @@ resource "docker_container" "redis" {
   env = [
     "REDIS_ARGS=--requirepass password --user username on >password ~* allcommands --user default off nopass nocommands",
   ]
+
+  lifecycle {
+    ignore_changes = [
+      image,
+      ports
+    ]
+  }
+
 }
 
