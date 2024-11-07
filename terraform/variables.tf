@@ -83,3 +83,14 @@ variable "test_users" {
     }
   ]
 }
+
+variable "redis_version" {
+  description = "version of Redis container to run"
+  default     = "bookworm"
+}
+
+variable "redis_container_name" {
+  description = "Name of docker container for redis"
+  type        = string
+  default     = "redis_cache"
+}

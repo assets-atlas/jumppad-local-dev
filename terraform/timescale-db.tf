@@ -35,7 +35,8 @@ EOF
 
   lifecycle {
     ignore_changes = [
-      image
+      image,
+      ports
     ]
   }
 }
@@ -64,8 +65,8 @@ docker exec ${var.timescale_db_container_name} psql "host=localhost port=5432 db
   -c 'CREATE TABLE coinbase (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    access_token VARCHAR(255),
     refresh_token VARCHAR(255),
+    access_token VARCHAR(255),
     token_expiry TIMESTAMP
 );'
 

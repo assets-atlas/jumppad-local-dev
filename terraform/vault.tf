@@ -45,7 +45,8 @@ resource "docker_container" "vault" {
 
   lifecycle {
     ignore_changes = [
-      image
+      image,
+      ports
     ]
   }
 }
@@ -142,6 +143,7 @@ resource "vault_transit_secret_backend_key" "api" {
   name                  = "api"
   derived               = true
   convergent_encryption = true
+  deletion_allowed      = true
 }
 
 #resource "vault_generic_endpoint" "test_users" {
