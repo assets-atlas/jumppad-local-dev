@@ -3,7 +3,6 @@ resource "docker_image" "redis" {
 }
 
 resource "docker_container" "redis" {
-
   image = docker_image.redis.name
   name  = var.redis_container_name
 
@@ -15,9 +14,12 @@ resource "docker_container" "redis" {
     protocol = "tcp"
   }
 
-  env = [
-    "REDIS_ARGS=--requirepass password --user username on >password ~* allcommands --user default off nopass nocommands",
-  ]
+  volumes {
+    host_path      = "${path.cwd}/redis.conf"
+    container_path = "/usr/local/etc/redis/redis.conf"
+  }
+
+  command = ["redis-server", "/usr/local/etc/redis/redis.conf"]
 
   lifecycle {
     ignore_changes = [
@@ -25,6 +27,4 @@ resource "docker_container" "redis" {
       ports
     ]
   }
-
 }
-
