@@ -50,7 +50,8 @@ docker exec ${var.timescale_db_container_name} psql "host=localhost port=5432 db
   -c "CREATE USER vault WITH SUPERUSER PASSWORD 'password';"
 
 docker exec ${var.timescale_db_container_name} psql "host=localhost port=5432 dbname=${var.timescale_db} user=${var.timescale_user} password=${var.timescale_password} sslmode=disable" \
-  -c 'CREATE TABLE users (
+  -c '
+CREATE TABLE users (
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         mobile VARCHAR(255) UNIQUE NOT NULL,
@@ -60,17 +61,17 @@ docker exec ${var.timescale_db_container_name} psql "host=localhost port=5432 db
         middle_name VARCHAR(255),
         last_name VARCHAR(255),
         dob VARCHAR(255)
-);'
-docker exec ${var.timescale_db_container_name} psql "host=localhost port=5432 dbname=${var.timescale_db} user=${var.timescale_user} password=${var.timescale_password} sslmode=disable" \
-  -c 'CREATE TABLE coinbase (
+);
+
+CREATE TABLE coinbase (
     id SERIAL PRIMARY KEY,
     user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     refresh_token VARCHAR(255),
     access_token VARCHAR(255),
     token_expiry TIMESTAMP
-);'
-docker exec ${var.timescale_db_container_name} psql "host=localhost port=5432 dbname=${var.timescale_db} user=${var.timescale_user} password=${var.timescale_password} sslmode=disable" \
-  -c 'CREATE TABLE coinbase_portfolio (
+);
+
+CREATE TABLE coinbase_portfolio (
       id SERIAL PRIMARY KEY,
       user_id INT REFERENCES users(id) ON DELETE CASCADE,
       asset_id VARCHAR(255),         -- Unique identifier for each asset or account
@@ -79,10 +80,8 @@ docker exec ${var.timescale_db_container_name} psql "host=localhost port=5432 db
       asset_symbol VARCHAR(10),      -- Symbol of the asset, e.g., "BTC"
       timestamp TIMESTAMP DEFAULT NOW(),  -- Timestamp for the snapshot
       CONSTRAINT unique_snapshot UNIQUE (user_id, asset_id, timestamp)
-  );'
+  );
 
-docker exec ${var.timescale_db_container_name} psql "host=localhost port=5432 dbname=${var.timescale_db} user=${var.timescale_user} password=${var.timescale_password} sslmode=disable" \
-  -c '
 CREATE TABLE truelayer_tokens (
     user_id INT PRIMARY KEY,
     access_token VARCHAR NOT NULL,
@@ -162,7 +161,6 @@ CREATE TRIGGER set_timestamp
 BEFORE UPDATE ON truelayer_credit_commitments
 FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();'
-
 
 EOF
   }
