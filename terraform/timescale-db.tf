@@ -82,6 +82,16 @@ CREATE TABLE coinbase_portfolio (
       CONSTRAINT unique_snapshot UNIQUE (user_id, asset_id, timestamp)
   );
 
+CREATE TABLE binance (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    refresh_token VARCHAR(255),
+    access_token VARCHAR(255),
+    token_expiry TIMESTAMP,
+    api_token VARCHAR(255)
+);
+
+
 CREATE TABLE truelayer_tokens (
     user_id INT PRIMARY KEY,
     access_token VARCHAR NOT NULL,
