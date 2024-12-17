@@ -71,6 +71,43 @@ CREATE TABLE coinbase (
     token_expiry TIMESTAMP
 );
 
+CREATE TABLE insurance (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255),
+    insurer VARCHAR(255),
+    insurance_type VARCHAR(255),
+    policy_number VARCHAR(255),
+    insured_amount NUMERIC(15, 2),
+    start_date DATE,
+    end_date DATE,
+    policy_documents TEXT,
+    CONSTRAINT unique_insurer_policy_number UNIQUE (insurer, policy_number)
+);
+
+CREATE TABLE property (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    address_line_1 VARCHAR(255) NOT NULL,
+    address_line_2 VARCHAR(255),
+    city VARCHAR(255) NOT NULL,
+    county VARCHAR(255) NOT NULL,
+    postcode VARCHAR(255) NOT NULL,
+    country VARCHAR(255) NOT NULL,
+    property_type VARCHAR(255) NOT NULL,
+    acquisition_date DATE NOT NULL,
+    acquisition_price NUMERIC(15, 2) NOT NULL,
+    insurance_id INTEGER REFERENCES insurance(id),
+);
+
+CREATE TABLE property_value (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER REFERENCES property(id) ON DELETE CASCADE,
+    current_market_value NUMERIC(15, 2),
+    recorded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE coinbase_portfolio (
       id SERIAL PRIMARY KEY,
       user_id INT REFERENCES users(id) ON DELETE CASCADE,
@@ -88,7 +125,20 @@ CREATE TABLE binance (
     refresh_token VARCHAR(255),
     access_token VARCHAR(255),
     token_expiry TIMESTAMP,
-    api_token VARCHAR(255)
+    api_key VARCHAR(255),
+    secret_key VARCHAR(255)
+);
+
+CREATE TABLE binance_portfolio (
+    id SERIAL PRIMARY KEY,                 -- Unique identifier for each portfolio record
+    user_id INT NOT NULL,                  -- Foreign key linking to the users table
+    recorded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Timestamp of the record
+    account_type VARCHAR(50) NOT NULL,     -- Type of account (e.g., SPOT)
+    update_time BIGINT NOT NULL,           -- Update time from Binance API
+    asset VARCHAR(50) NOT NULL,            -- Asset name (e.g., BTC, ETH)
+    free_amount NUMERIC(20, 8) NOT NULL,   -- Free balance of the asset
+    locked_amount NUMERIC(20, 8) NOT NULL, -- Locked balance of the asset
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 
