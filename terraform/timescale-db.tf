@@ -85,27 +85,60 @@ CREATE TABLE insurance (
     CONSTRAINT unique_insurer_policy_number UNIQUE (insurer, policy_number)
 );
 
-CREATE TABLE property (
+CREATE TABLE properties (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL UNIQUE,
-    address_line_1 VARCHAR(255) NOT NULL,
-    address_line_2 VARCHAR(255),
-    city VARCHAR(255) NOT NULL,
-    county VARCHAR(255) NOT NULL,
-    postcode VARCHAR(255) NOT NULL,
-    country VARCHAR(255) NOT NULL,
-    property_type VARCHAR(255) NOT NULL,
-    acquisition_date DATE NOT NULL,
-    acquisition_price NUMERIC(15, 2) NOT NULL,
-    insurance_id INTEGER REFERENCES insurance(id),
+    user_id INTEGER NOT NULL,
+    paon VARCHAR(100),                         -- Primary Addressable Object Name (e.g., "9")
+    street VARCHAR(100),
+    town VARCHAR(100),
+    district VARCHAR(100),
+    county VARCHAR(100),
+    postcode VARCHAR(10),
+    description VARCHAR(255),                 -- Full address description
+    type VARCHAR(50),                         -- Property type (e.g., Detached)
+    tenure VARCHAR(50),                       -- Freehold/Leasehold
+    age VARCHAR(50),                          -- Construction age range
+    built_form VARCHAR(50),                   -- Built form (e.g., Detached)
+    floor_area FLOAT,                         -- Total floor area in square meters
+    habitable_rooms INT,                      -- Number of habitable rooms
+    heated_rooms INT,                         -- Number of heated rooms
+    current_energy_rating CHAR(1),            -- Current EPC energy rating
+    potential_energy_rating CHAR(1),          -- Potential EPC energy rating
+    pid VARCHAR(100),                         -- Property identifier
+    latitude FLOAT,                           -- GPS latitude
+    longitude FLOAT,                          -- GPS longitude
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE property_value (
+CREATE TABLE property_values (
     id SERIAL PRIMARY KEY,
-    property_id INTEGER REFERENCES property(id) ON DELETE CASCADE,
-    current_market_value NUMERIC(15, 2),
-    recorded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    property_id INTEGER NOT NULL,
+    date DATE NOT NULL,                       -- Date of value estimation
+    estimated_value FLOAT NOT NULL,           -- Estimated property value
+    price_per_sqm FLOAT,                      -- Estimated price per square meter
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
+);
+
+CREATE TABLE epc_costs_history (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL,
+    date DATE NOT NULL,                       -- Date of cost estimation
+    cost_type VARCHAR(50) NOT NULL,           -- Cost type: Lighting, Heating, Water, etc.
+    current_cost FLOAT,                       -- Current estimated cost
+    potential_cost FLOAT,                     -- Potential cost after improvements
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
+);
+
+CREATE TABLE council_tax (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL,
+    band VARCHAR(10) NOT NULL,                -- Council tax band (e.g., A, B, C, F)
+    annual_cost FLOAT NOT NULL,               -- Annual council tax cost
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
 );
 
 CREATE TABLE coinbase_portfolio (
@@ -140,88 +173,8 @@ CREATE TABLE binance_portfolio (
     locked_amount NUMERIC(20, 8) NOT NULL, -- Locked balance of the asset
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
-
-CREATE TABLE truelayer_tokens (
-    user_id INT PRIMARY KEY,
-    access_token VARCHAR NOT NULL,
-    refresh_token VARCHAR NOT NULL,
-    token_expiry TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
-CREATE TABLE truelayer_bank_accounts (
-    account_id VARCHAR PRIMARY KEY,
-    user_id INT,
-    account_type VARCHAR,
-    account_name VARCHAR,
-    currency VARCHAR(3),
-    balance DECIMAL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
-CREATE TABLE truelayer_transactions (
-    transaction_id VARCHAR PRIMARY KEY,
-    account_id VARCHAR,
-    user_id INT,
-    amount DECIMAL,
-    currency VARCHAR(3),
-    description VARCHAR,
-    transaction_date TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (account_id) REFERENCES truelayer_bank_accounts(account_id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
-CREATE TABLE truelayer_credit_commitments (
-    commitment_id VARCHAR PRIMARY KEY,
-    user_id INT,
-    commitment_type VARCHAR,
-    provider VARCHAR,
-    balance DECIMAL,
-    interest_rate DECIMAL,
-    monthly_payment DECIMAL,
-    due_date DATE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- Create a trigger function to update the updated_at column
-CREATE OR REPLACE FUNCTION update_timestamp()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Add the trigger to each table
-CREATE TRIGGER set_timestamp
-BEFORE UPDATE ON truelayer_tokens
-FOR EACH ROW
-EXECUTE FUNCTION update_timestamp();
-
-CREATE TRIGGER set_timestamp
-BEFORE UPDATE ON truelayer_bank_accounts
-FOR EACH ROW
-EXECUTE FUNCTION update_timestamp();
-
-CREATE TRIGGER set_timestamp
-BEFORE UPDATE ON truelayer_transactions
-FOR EACH ROW
-EXECUTE FUNCTION update_timestamp();
-
-CREATE TRIGGER set_timestamp
-BEFORE UPDATE ON truelayer_credit_commitments
-FOR EACH ROW
-EXECUTE FUNCTION update_timestamp();'
-
+'
 EOF
+
   }
 }
